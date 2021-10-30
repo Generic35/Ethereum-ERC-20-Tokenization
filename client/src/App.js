@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 class App extends Component {
-  state = { loaded: false, kycAddress: '0x123...', tokenSaleAddress: null};
+  state = { loaded: false, kycAddress: '0x123...', tokenSaleAddress: null, userTokens: 0};
 
   componentDidMount = async () => {
     try {
@@ -34,9 +34,8 @@ class App extends Component {
         KycContract.networks[this.networkId] && KycContract.networks[this.networkId].address,
       );
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      this.setState({ loaded: true, tokenSaleAddress:  MyTokenSale.networks[this.networkId].address});
+			this.listenToTokenTransfer();
+      this.setState({ loaded: true, tokenSaleAddress:  MyTokenSale.networks[this.networkId].address}, this.updateUserTokens);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -61,6 +60,15 @@ class App extends Component {
 		alert("KYC for " + this.state.kycAddress + " is completed");
 	}
 
+	updateUserTokens = async () => {
+		let userTokens = await this.tokenInstante.methods.balanceOf(this.accounts[0]).call()
+		this.setState({userTokens: userTokens});
+	}
+
+	listenToTokenTransfer = () => {
+		this.tokenInstante.events.Transfer({to:this.accounts[0]}).on("data", this.updateUserTokens)
+	}
+
   render() {
     if (!this.state.loaded) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -74,6 +82,8 @@ class App extends Component {
 				<button type="button" onClick={this.handleKycWhiteListing}>Add to whitelist</button>
 				<h2>Buy Tokens</h2>
 				<p>If you want to buy tokens send Wei to this address: {this.state.tokenSaleAddress}</p>
+				<p>You currently have : {this.state.userTokens } CAPPU Tokens</p>
+				<button type="button">Buy more tokens</button>
         </div>
     );
   }
