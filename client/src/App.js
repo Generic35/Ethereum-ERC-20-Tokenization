@@ -69,6 +69,10 @@ class App extends Component {
 		this.tokenInstante.events.Transfer({to:this.accounts[0]}).on("data", this.updateUserTokens)
 	}
 
+	handleBuyTokens = async () => {
+		this.tokenSaleInstante.methods.buyTokens(this.accounts[0]).send({from: this.accounts[0], value: this.web3.utils.toWei("1", "wei")});
+	}
+
   render() {
     if (!this.state.loaded) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -83,7 +87,7 @@ class App extends Component {
 				<h2>Buy Tokens</h2>
 				<p>If you want to buy tokens send Wei to this address: {this.state.tokenSaleAddress}</p>
 				<p>You currently have : {this.state.userTokens } CAPPU Tokens</p>
-				<button type="button">Buy more tokens</button>
+				<button type="button" onClick={this.handleBuyTokens}>Buy more tokens</button>
         </div>
     );
   }
